@@ -87,7 +87,7 @@ drawScreen$:
 	ldr r0,=FrameBufferSwapTag
 	mov r1,#0
 	str r1,[r0,#4] // Indicate this is a request.
-	str r1,[r0,#20] // 
+	str r1,[r0,#20] //
 	str r1,[r0,#24] // Y offset is the 7th word (offset 6*4 = 24).
 	and r0,#0xFFFFFFF0
 	orr r0,#8
@@ -107,7 +107,6 @@ drawScreen$:
 		bne drawOffsetPixel$
 
 	// Display the offset buffer.
-	bl Pause
 	ldr r0,=FrameBufferSwapTag
 	mov r1,#0
 	str r1,[r0,#4] // Indicate this is a request.
