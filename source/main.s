@@ -53,36 +53,53 @@ mov r0,#3 // Flash three times to indicate failure.
 cmp r1,#0x80000000
 blne DebugFlash
 */
-	
+// Send swap tag.
+
+	/*
+// Test for an error response code from the mailbox.
+ldr r0,=FrameBufferSwapTag
+add r0,#4 // The memory address of the response code.
+ldr r1,[r0]
+mov r0,#3 // Flash three times to indicate failure.
+cmp r1,#0x80000000
+blne DebugFlash
+*/
+	/*
+ldr r0,=1843224
+add r0,r5
+mov r1,#0xFF00
+strh r1,[r0]
+	*/
+
+mov r7,#0xFF
 drawScreen$:
 	mov r8,r5 // Current pixel.
-	ldr r6,=921600
-//	ldr r6,=1843200 // 1280 * 720 * 2
+	ldr r6,=1843200 // 1280 * 720 * 2
 	add r6,r5
-	mov r7,#0xFF
 	drawPixel$:
 		strh r7,[r8]
 		add r8,#2
 		cmp r8,r6
 		bne drawPixel$
-/*	
+	add r7,#0x8
+
 	// Display the non-offset buffer.
 	ldr r0,=FrameBufferSwapTag
 	mov r1,#0
 	str r1,[r0,#4] // Indicate this is a request.
+	str r1,[r0,#20] // 
 	str r1,[r0,#24] // Y offset is the 7th word (offset 6*4 = 24).
 	and r0,#0xFFFFFFF0
 	orr r0,#8
 	ldr r1,=0x2000b8a0
 	str r0,[r1]
-*/
+	
 	// Wait for message to get through.
 	bl Pause
 	bl Pause
-
-	ldr r6,=1843200
-	add r6,r6 // Last pixel.
-	mov r7,#0xFF00
+	
+	ldr r4,=1843200
+	add r6,r4 // Last pixel.
 	drawOffsetPixel$:
 		strh r7,[r8]
 		add r8,#2
@@ -90,18 +107,19 @@ drawScreen$:
 		bne drawOffsetPixel$
 
 	// Display the offset buffer.
+	bl Pause
 	ldr r0,=FrameBufferSwapTag
-//	mov r0,#0
-//	str r0,[r0,#4] // Indicate this is a request.
-//	mov r1,#720
-//	str r1,[r0,#24] // Y offset is the 7th word (offset 6*4 = 24).
+	mov r1,#0
+	str r1,[r0,#4] // Indicate this is a request.
+	str r1,[r0,#20] 
+	mov r1,#720
+	str r1,[r0,#24] // Y offset is the 7th word (offset 6*4 = 24).
 	and r0,#0xFFFFFFF0
 	orr r0,#8
 	ldr r1,=0x2000b8a0
 	str r0,[r1]
 
-	// Wait for message to get through.
 	bl Pause
-	bl Pause
+	bl Pause	
 
 	b drawScreen$
