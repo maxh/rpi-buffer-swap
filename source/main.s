@@ -10,13 +10,6 @@ main:
 // www.cl.cam.ac.uk/projects/raspberrypi/tutorials/os/ok03.html#newbeginning
 mov sp,#0x8000
 
-/*
-mov r0,#1
-bl DebugFlash
-bl Pause
-bl Pause
-*/
-	
 // Send tags to initialize framebuffer.
 ldr r0,=FrameBufferInitTags
 and r0,#0xFFFFFFF0
@@ -59,12 +52,12 @@ ldr r1,[r0]
 mov r0,#3 // Flash three times to indicate failure.
 cmp r1,#0x80000000
 blne DebugFlash
-
 */
 	
 drawScreen$:
 	mov r8,r5 // Current pixel.
-	ldr r6,=1843200 // 1280 * 720 * 2
+	ldr r6,=921600
+//	ldr r6,=1843200 // 1280 * 720 * 2
 	add r6,r5
 	mov r7,#0xFF
 	drawPixel$:
