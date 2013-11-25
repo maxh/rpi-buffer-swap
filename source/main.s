@@ -79,15 +79,18 @@ drawScreen$:
 	str r1,[r0,#16]
 
 	and r0,#0xFFFFFFF0
-	orr r0,#8
-	ldr r1,=0x2000b8a0
-	str r0,[r1]
+	mov r1,#8
+	bl MailboxWrite
+
+//	orr r0,#8
+//	ldr r1,=0x2000b8a0
+//	str r0,[r1]
 
 	// Test for an error response code from the mailbox.
 	ldr r0,=FrameBufferSwapTag
 	ldr r1,[r0,#4]
 	mov r0,#2 // Flash to indicate failure.
-	cmp r1,#0x80000000
+	cmp r1,#0x80000001
 	blne DebugFlash
 
 	// Wait for message to get through.
@@ -120,15 +123,17 @@ drawScreen$:
 	mov r1,#720
 	str r1,[r0,#24] // Y offset is the 7th word (offset 6*4 = 24).
 	and r0,#0xFFFFFFF0
-	orr r0,#8
-	ldr r1,=0x2000b8a0
-	str r0,[r1]
-
+//	orr r0,#8
+//	ldr r1,=0x2000b8a0
+//	str r0,[r1]
+	mov r1,#8
+	bl MailboxWrite
+	
 	// Test for an error response code from the mailbox.
 	ldr r0,=FrameBufferSwapTag
 	ldr r1,[r0,#4]
 	mov r0,#1 // Flash to indicate failure.
-	cmp r1,#0x80000000
+	cmp r1,#0x80000001
 	blne DebugFlash
 
 	bl Pause
