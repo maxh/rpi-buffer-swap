@@ -16,7 +16,10 @@ and r0,#0xFFFFFFF0
 mov r1,#8
 bl MailboxWrite
 
-bl Pause
+// Even though we read the frame buffer base address from FrameBufferInitTags,
+// We need to read from the Mailbox to avoid having the Mailbox fill up.
+mov r0,#8
+bl MailboxRead
 
 // Read the frame buffer base address.
 // github.com/raspberrypi/firmware/wiki/Mailbox-property-interface#allocate-buffer
@@ -65,6 +68,12 @@ toggleBuffer$:
 	mov r1,#8
 	bl MailboxWrite
 
+	mov r0,#8
+	// To clear the mailbox, we need to read from it, even though we don't
+	// actually use the information.  If we don't clear it, the mailbox
+	// will get full and cannot send new messages.
+	bl MailboxRead
+
 	bl Pause // Wait for message to get through.
 
 	// Display the offset buffer.
@@ -88,6 +97,8 @@ toggleBuffer$:
 	mov r1,#8
 	bl MailboxWrite
 
+	mov r0,#8
+	bl MailboxRead // Again, clear the Mailbox.
 	bl Pause	
 
 	b toggleBuffer$

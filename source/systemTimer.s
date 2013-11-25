@@ -1,7 +1,7 @@
 .globl Pause
 Pause:
 	push {r6}
-	mov r6,#0xAF0000
+	mov r6,#0xAF000
 	wait$:
 		sub r6,#1
 		cmp r6,#0
