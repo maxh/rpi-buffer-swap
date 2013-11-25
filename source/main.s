@@ -13,18 +13,9 @@ mov sp,#0x8000
 // Send tags to initialize framebuffer.
 ldr r0,=FrameBufferInitTags
 and r0,#0xFFFFFFF0
-orr r0,#8
-ldr r1,=0x2000b8a0
-str r0,[r1]
+mov r1,#8
+bl MailboxWrite
 
-// Test for an error response code from the mailbox.
-ldr r0,=FrameBufferInitTags
-ldr r1,[r0,#4]
-mov r0,#3 // Flash three times.
-cmp r1,#0x80000000
-blne DebugFlash
-
-bl Pause
 bl Pause
 
 // Read the frame buffer base address.
@@ -32,36 +23,28 @@ bl Pause
 ldr r0,=FrameBufferInitTags
 ldr r5,[r0,#76]
 
-	mov r8,r5 // Current pixel.
-	ldr r6,=1843200 // 1280 * 720 * 2
-	add r6,r5
-	mov r7,#0xFF
-	drawPixel$:
-		strh r7,[r8]
-		add r8,#2
-		cmp r8,r6
-		bne drawPixel$	
-	ldr r4,=1843200
-	add r6,r4 // Last pixel.
-	mov r7,#0xFF00
-	drawOffsetPixel$:
-		strh r7,[r8]
-		add r8,#2
-		cmp r8,r6
-		bne drawOffsetPixel$
+/* Set each pixel in the non-offset frame buffer to blue. */
+mov r8,r5 // Current pixel.
+ldr r6,=1843200 // 1280 * 720 * 2
+add r6,r5
+mov r7,#0xFF // Blue.
+drawPixel$:
+	strh r7,[r8]
+	add r8,#2
+	cmp r8,r6
+	bne drawPixel$	
 
-drawScreen$:
-/*	mov r8,r5 // Current pixel.
-	ldr r6,=1843200 // 1280 * 720 * 2
-	add r6,r5
-	mov r7,#0xFF
-	drawPixel$:
-		strh r7,[r8]
-		add r8,#2
-		cmp r8,r6
-		bne drawPixel$
-	add r7,#0x8
-*/
+/* Set each pixel in the offset frame buffer to yellow. */
+ldr r4,=1843200
+add r6,r4 // Last pixel
+mov r7,#0xFF00 // Yellow
+drawOffsetPixel$:
+	strh r7,[r8]
+	add r8,#2
+	cmp r8,r6
+	bne drawOffsetPixel$
+
+toggleBuffer$:
 	// Display the non-offset buffer.
 	ldr r0,=FrameBufferSwapTag
 	mov r1,#0
@@ -82,30 +65,8 @@ drawScreen$:
 	mov r1,#8
 	bl MailboxWrite
 
-//	orr r0,#8
-//	ldr r1,=0x2000b8a0
-//	str r0,[r1]
+	bl Pause // Wait for message to get through.
 
-	// Test for an error response code from the mailbox.
-	ldr r0,=FrameBufferSwapTag
-	ldr r1,[r0,#4]
-	mov r0,#2 // Flash to indicate failure.
-	cmp r1,#0x80000001
-	blne DebugFlash
-
-	// Wait for message to get through.
-	bl Pause
-	bl Pause
-/*	
-	ldr r4,=1843200
-	add r6,r4 // Last pixel.
-	mov r7,#0xFF00
-	drawOffsetPixel$:
-		strh r7,[r8]
-		add r8,#2
-		cmp r8,r6
-		bne drawOffsetPixel$
-*/
 	// Display the offset buffer.
 	ldr r0,=FrameBufferSwapTag
 	mov r1,#0
@@ -122,21 +83,11 @@ drawScreen$:
 	str r1,[r0,#16]
 	mov r1,#720
 	str r1,[r0,#24] // Y offset is the 7th word (offset 6*4 = 24).
+
 	and r0,#0xFFFFFFF0
-//	orr r0,#8
-//	ldr r1,=0x2000b8a0
-//	str r0,[r1]
 	mov r1,#8
 	bl MailboxWrite
-	
-	// Test for an error response code from the mailbox.
-	ldr r0,=FrameBufferSwapTag
-	ldr r1,[r0,#4]
-	mov r0,#1 // Flash to indicate failure.
-	cmp r1,#0x80000001
-	blne DebugFlash
 
-	bl Pause
 	bl Pause	
 
-	b drawScreen$
+	b toggleBuffer$
